@@ -1,0 +1,120 @@
+class LostFoundSys():
+    '''
+    The LostFoundSys class is the main system of the software.
+    When started, it will interract with a database, stored as lostfound.csv file
+    Currently, the class contains methods to start and exit the system,
+    and methods to report, claim, display and remove items.
+    '''
+
+    # All items are maintained as instances of the Item class, in a class variable ItemList[].
+    ItemList = []
+
+
+    def start():
+        """
+        To start the system, data is read from "lostfound.csv"
+        and is converted to instances of Item and is stored in ItemList
+        """
+        
+        open("lostfound.csv", "a").close()  # 确保文件存在，防止首次运行报错
+
+        file1 = open("lostfound.csv", "r")  # Open the file 'lostfound.csv' with the mode 'r'. 'r': read
+        str1 = file1.read()                 # The variable str1 is a string
+        records = str1.split('\n')          # The variable records is a list
+        LostFoundSys.ItemList.clear()       # The clear() method removes all the elements from a list. Syntax: list.clear()
+
+        for i in range(len(records)):
+            if not records[i]:              # 拦截空行，防止产生 IndexError 异常
+                continue
+            strTemp = records[i].split(',')
+            itemTemp = Item(strTemp[0], strTemp[1], strTemp[2], strTemp[3], strTemp[4])
+            LostFoundSys.ItemList.append(itemTemp)
+
+        file1.close()                       # Close the file1
+        print("\nThe BNBU Lost&Found System is started.\n")
+
+        # The return statement can be used for possible extension of the system
+        # For example, if a functionality shall be triggered by start(),
+        # then the boolean value can be used to test if start() is executed sucessfully.
+        return True
+
+
+    def exit():
+        """
+        To exit the system, all instances of item in ItemList
+        are over-written into the database "lostfound.csv"
+        """
+
+        file1 = open("lostfound.csv", "w")  # Open the file 'lostfound.csv' with the mode 'w'. 'w': write
+        for x in LostFoundSys.ItemList:     # Notice that each element of ItemList is an object from the Item class
+            file1.write(x.toString() + '\n')
+
+        file1.close()                       # Close the file1
+        print("\nThe BNBU Lost&Found System is closed.\n")
+
+        LostFoundSys.ItemList.clear()       # Think about why do we need this line of code?
+
+        return True
+
+
+    def report(item):
+        """
+        To report an item, the instance of the item shall be added to Itemlist
+        """
+        LostFoundSys.ItemList.append(item)
+        print("New item " + item.name + " has been reported.")
+
+
+    # The current implementation verifies the item name only, which is not ideal.
+    # How it works: When there is a matching item which is not claimed yet,
+    # the item's status will be updated to "Claimed".
+    # Otherwise, the item will not be claimed.
+    def claim(name, location):
+        """
+        To claim a specific item from the current inventory
+        """
+        match = False
+        matching_items = []
+        
+        for i in LostFoundSys.ItemList:
+            if i.name.lower() == name.lower() and i.location.lower() == location.lower() and i.status == "Found":
+                matching_items.append(i)
+                match = True
+
+        if not match:
+            print("No such item (" + name + ") found at " + location + " or it's already claimed.")
+            return
+
+        for item in matching_items:
+            print("\nTo claim this [" + item.name + "], please answer the secret question:")
+            print("Question: " + item.secretQuestion)
+            answer = input("Your answer: ")
+            
+            if answer.lower() == item.secretAnswer.lower():
+                item.status = "Claimed"
+                print(name + " has been successfully claimed.")
+                return  
+            else:
+                print("Incorrect answer for this specific item.")
+        
+        print("Claim failed. No correct answers provided for any matching items.")
+        
+        
+    def remove(item):
+        """
+        To remove a specific item from the inventory
+        """
+        if item in LostFoundSys.ItemList:
+            LostFoundSys.ItemList.remove(item)
+
+
+    def display():
+        """
+        To display all the items that are currently in the inventory including both
+        found and claimed ones, without showing the secret question and answer
+        """
+        print("\nThe current inventory includes the following unclaimed items:")
+        print("Status\tItem Name\tLocation Found")
+        for i in LostFoundSys.ItemList:
+            if i.status == "Found":
+                print(i.status + '\t' + i.name + '\t\t' + i.location)
