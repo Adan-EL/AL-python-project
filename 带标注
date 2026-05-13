@@ -148,3 +148,31 @@ class LostFoundSys():
             # =================================================================
             if i.status == "Found":
                 print(i.status + '\t' + i.name + '\t\t' + i.location)
+
+
+# As of now, there is no user-interaction mechanism built in yet.
+# Only the administrator can interact with the system through direct coding.
+# The following is an example of such interaction:
+
+# To start the system
+LostFoundSys.start()
+
+# To create instances of Item to report
+item1 = Item("Found", "Iphone", "T29",  "what color is it?", "Red")
+item2 = Item("Found", "Macbook", "T5", "locked screen pic?", "Eagle")
+item3 = Item("Found", "Macbook", "T6", "locked screen pic?", "Apple")
+
+# To report the above items
+LostFoundSys.report(item1)
+LostFoundSys.report(item2)
+LostFoundSys.report(item3)
+
+
+# To claim item(s)
+LostFoundSys.claim("macbook","T5")
+
+# To check on the current inventory
+LostFoundSys.display()
+
+# To exit the system
+LostFoundSys.exit()
